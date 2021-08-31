@@ -1,7 +1,7 @@
 #include<iostream>
 #include<thread>
-#include<mutex> //锁
-#include<atomic> //原子
+#include<mutex> //脣酶
+#include<atomic> //脭颅脳脫
 using namespace std;
 
 mutex m;
@@ -9,14 +9,14 @@ atomic<int> sum = 0;
 
 void workFun(int index)
 {
-	//lock_guard<mutex> lg(m); //自解锁，从申明处开始加锁，退出作用域后自动解锁
-	//m.lock(); //临界区
+	//lock_guard<mutex> lg(m); //脳脭陆芒脣酶拢卢麓脫脡锚脙梅麓娄驴陋脢录录脫脣酶拢卢脥脣鲁枚脳梅脫脙脫貌潞贸脳脭露炉陆芒脣酶
+	//m.lock(); //脕脵陆莽脟酶
 	sum++;
 	//m.unlock();
 	cout << "sum=" <<sum<< endl;
 }
 
-int main() //main函数会被默认当作当前程序的主线程
+int main() //main潞炉脢媒禄谩卤禄脛卢脠脧碌卤脳梅碌卤脟掳鲁脤脨貌碌脛脰梅脧脽鲁脤
 {
 	thread* t[3];
 	for (int n = 0; n < 3; n++)
@@ -24,8 +24,8 @@ int main() //main函数会被默认当作当前程序的主线程
 		t[n] = new thread(workFun, n);
 		(*t[n]).detach();
 	}
-	//t.detach(); //主线程与子线程线程分离执行，但是当主线程结束，子线程也会被迫结束
-	//t.join(); //子线程执行结束之后才返回主线程继续执行，即主线程被阻塞；但是创建出来的多个子线程之间是可以并行执行的
+	//t.detach(); //脰梅脧脽鲁脤脫毛脳脫脧脽鲁脤脧脽鲁脤路脰脌毛脰麓脨脨拢卢碌芦脢脟碌卤脰梅脧脽鲁脤陆谩脢酶拢卢脳脫脧脽鲁脤脪虏禄谩卤禄脝脠陆谩脢酶
+	//t.join(); //脳脫脧脽鲁脤脰麓脨脨陆谩脢酶脰庐潞贸虏脜路碌禄脴脰梅脧脽鲁脤录脤脨酶脰麓脨脨拢卢录麓脰梅脧脽鲁脤卤禄脳猫脠没拢禄碌芦脢脟麓麓陆篓鲁枚脌麓碌脛露脿赂枚脳脫脧脽鲁脤脰庐录盲脢脟驴脡脪脭虏垄脨脨脰麓脨脨碌脛
 	cout << "Hello, I'm main thread"<<endl;
 	return 0;
 }

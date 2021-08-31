@@ -119,8 +119,14 @@ public:
 	}
 
 	//处理网络信息
+	//备份客户socket fd_set，方便提高查询效率
+	fd_set _fdRead_backup;
+	//客户列表是否有变化
+	bool _clients_change;
+	SOCKET _maxSock;
 	bool OnRun()
 	{
+		
 		while(isRun()) //判断是否socket正在工作中
 		{
 			//从缓冲区中取出客户数据
@@ -132,6 +138,7 @@ public:
 					_clients.push_back(pClient);
 				}
 				_clientsBuff.clear();
+				_clients_change = true;
 			}
 
 			//如果正式客户端队列中没有需要处理的客户端，则跳过循环
@@ -144,25 +151,28 @@ public:
 
 			//伯克利套接字 BSD socket
 			fd_set fdRead;  //描述符(socket)集合
-			//fd_set fdWrite;
-			//fd_set fdExp;
-			FD_ZERO(&fdRead);
-			//FD_ZERO(&fdWrite);
-			//FD_ZERO(&fdExp);
 
-			SOCKET maxSock = _clients[0]->sockfd();
-			for (int n = (int)_clients.size() - 1; n >= 0; n--)
-			{
-				FD_SET(_clients[n]->sockfd(), &fdRead);
-				if (maxSock < _clients[n]->sockfd())
+			FD_ZERO(&fdRead);
+			if (_clients_change) {
+				_clients_change = false;
+				_maxSock = _clients[0]->sockfd();
+				for (int n = (int)_clients.size() - 1; n >= 0; n--)
 				{
-					maxSock = _clients[n]->sockfd();
+					FD_SET(_clients[n]->sockfd(), &fdRead);
+					if (_maxSock < _clients[n]->sockfd())
+					{
+						_maxSock = _clients[n]->sockfd();
+					}
 				}
+				memcpy(&_fdRead_backup, &fdRead, sizeof(fd_set));
+			}
+			else {
+				memcpy(&fdRead, &_fdRead_backup, sizeof(fd_set));
 			}
 
 			//nfds是一个整数值，指fd_set集合中所有描述符(socket)的范围，而不是数量
 			//即nfds是所有文件描述符中最大值+1，在windows下这个参数也设置为0
-			int ret = select(maxSock + 1, &fdRead, nullptr, nullptr, nullptr);
+			int ret = select(_maxSock + 1, &fdRead, nullptr, nullptr, nullptr);
 			if (ret < 0)
 			{
 				printf("select任务结束 \n");
@@ -182,6 +192,7 @@ public:
 						iter += n;
 						if (iter != _clients.end())
 						{
+							_clients_change = false;
 							if(_pNetEvent)
 								_pNetEvent->OnLeave(_clients[n]); //_pNetEvent是类EasyTcpServer的指针
 							delete _clients[n];
